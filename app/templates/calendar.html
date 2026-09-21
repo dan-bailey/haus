@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Meal calendar | Haus{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+  <div>
+    <p class="text-uppercase small fw-semibold mb-1">Meal planning</p>
+    <h1 class="h2 mb-0">{{ week_start.strftime('%b %-d') }} - {{ days[-1].meal_date.strftime('%b %-d, %Y') if days[-1].meal_date else '' }}</h1>
+  </div>
+  <div class="btn-group" role="group" aria-label="Calendar week navigation">
+    <a class="btn btn-outline-secondary" href="/meals/calendar?week_start={{ previous_week }}">Previous</a>
+    <a class="btn btn-outline-secondary" href="/meals/calendar?week_start={{ next_week }}">Next</a>
+  </div>
+</div>
+<div class="row g-3">
+  {% for day in days %}
+  <div class="col-12 col-md-6 col-xl-4">
+    <article class="day-card rounded-2 p-3 {% if day.feral %}feral{% endif %}">
+      <div class="d-flex justify-content-between align-items-baseline mb-3">
+        <h2 class="h5 mb-0">{{ day.meal_date.strftime('%A') if day.meal_date else 'Open day' }}</h2>
+        {% if day.meal_date %}<time class="text-muted small" datetime="{{ day.meal_date }}">{{ day.meal_date.strftime('%b %-d') }}</time>{% endif %}
+      </div>
+      {% if day.feral %}
+        <p class="fw-semibold mb-2">Feral Day</p>
+        <p class="text-muted small mb-0">No meal scheduled.</p>
+      {% elif day.dishes %}
+        <ul class="list-unstyled mb-3">
+        {% for dish in day.dishes %}
+          <li class="mb-2">{% if dish.recipe_url %}<a href="{{ dish.recipe_url }}">{{ dish.title }}</a>{% else %}{{ dish.title }}{% endif %}</li>
+        {% endfor %}
+        </ul>
+        <span class="status text-muted">{{ day.status }}</span>
+      {% else %}
+        <p class="text-muted mb-0">No meal planned.</p>
+      {% endif %}
+    </article>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

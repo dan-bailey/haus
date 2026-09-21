@@ -1,0 +1,4 @@
+haus.home.arpa {
+    tls internal
+    reverse_proxy app:8000
+}

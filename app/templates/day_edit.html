@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Edit {{ meal_date.strftime('%A, %b %-d') }} | Haus{% endblock %}
+{% block content %}
+<div class="mb-4">
+  <a class="text-muted small text-decoration-none" href="/meals/calendar?week_start={{ week_start }}">← Calendar</a>
+  <h1 class="h2 mt-2 mb-0">Edit {{ meal_date.strftime('%A, %b %-d, %Y') }}</h1>
+</div>
+
+{% if error %}
+<div class="alert alert-danger">{{ error }}</div>
+{% endif %}
+
+<form method="post" action="/meals/days/{{ meal_day_id }}/edit" style="max-width: 36rem;">
+  {% if can_feral %}
+  <div class="mb-4 form-check">
+    <input class="form-check-input" type="checkbox" id="feral" name="feral" value="1" {% if form_feral %}checked{% endif %}>
+    <label class="form-check-label" for="feral">Feral Day <span class="text-muted small">(no meal, everyone fends for themselves)</span></label>
+  </div>
+  {% endif %}
+
+  <div class="mb-4" id="dish-section" {% if form_feral %}style="display:none"{% endif %}>
+    <label class="form-label fw-semibold">Dishes</label>
+    {% if dishes %}
+    <input type="search" id="dish-filter" class="form-control form-control-sm mb-2" placeholder="Filter dishes…">
+    <div style="max-height: 20rem; overflow-y: auto; border: 1px solid #d8e0db; border-radius: .375rem; padding: .5rem;">
+      {% for dish in dishes %}
+      <div class="form-check dish-option">
+        <input class="form-check-input" type="checkbox" name="dish_ids" value="{{ dish.id }}" id="dish-{{ dish.id }}"
+          {% if dish.id in selected_dish_ids %}checked{% endif %}>
+        <label class="form-check-label small" for="dish-{{ dish.id }}">
+          {{ dish.title }}{% if dish.monthly_limit %} <span class="text-muted">(limit {{ dish.monthly_limit }}/mo)</span>{% endif %}
+        </label>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-muted small">No dishes yet. <a href="/meals/dishes/new">Add one first.</a></p>
+    {% endif %}
+  </div>
+
+  <button type="submit" class="btn btn-primary">Save changes</button>
+  <a href="/meals/calendar?week_start={{ week_start }}" class="btn btn-link text-muted">Cancel</a>
+</form>
+
+<script>
+document.getElementById('dish-filter')?.addEventListener('input', function () {
+  const q = this.value.toLowerCase();
+  document.querySelectorAll('.dish-option').forEach(function (el) {
+    el.style.display = el.textContent.toLowerCase().includes(q) ? '' : 'none';
+  });
+});
+{% if can_feral %}
+document.getElementById('feral')?.addEventListener('change', function () {
+  document.getElementById('dish-section').style.display = this.checked ? 'none' : '';
+});
+{% endif %}
+</script>
+{% endblock %}

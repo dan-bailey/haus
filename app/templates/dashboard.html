@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Dashboard | Haus{% endblock %}
+{% block content %}
+<div class="mb-4">
+  <h1 class="h2 mb-0">Welcome, {{ current_user.display_name }}</h1>
+  <p class="text-muted small mt-1 mb-0">{{ current_user.role | capitalize }}</p>
+</div>
+
+<div class="row g-4">
+  <div class="col-12 col-md-6">
+    <div class="card h-100 border" style="border-color: #d8e0db !important;">
+      <div class="card-body">
+        <h2 class="h5 card-title">Meals this week</h2>
+        {% if meal_days_planned == 0 %}
+          <p class="text-muted">No meals planned yet.</p>
+        {% else %}
+          <p class="mb-1">{{ meal_days_planned }} day{{ 's' if meal_days_planned != 1 }} planned</p>
+          {% if feral_days %}<p class="text-muted small mb-1">{{ feral_days }} Feral Day{{ 's' if feral_days != 1 }}</p>{% endif %}
+        {% endif %}
+        <a class="btn btn-sm btn-outline-secondary mt-2" href="/meals/calendar">View calendar</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-md-6">
+    <div class="card h-100 border" style="border-color: #d8e0db !important;">
+      <div class="card-body">
+        <h2 class="h5 card-title">Inventory</h2>
+        {% if open_loans == 0 %}
+          <p class="text-muted">No items currently on loan.</p>
+        {% else %}
+          <p class="mb-1">{{ open_loans }} item{{ 's' if open_loans != 1 }} on loan</p>
+        {% endif %}
+        <a class="btn btn-sm btn-outline-secondary mt-2" href="/inventory">Browse inventory</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Add dish | Haus{% endblock %}
+{% block content %}
+<div class="mb-4">
+  <a class="text-muted small text-decoration-none" href="/meals/dishes">← Dishes</a>
+  <h1 class="h2 mt-2 mb-0">Add dish</h1>
+</div>
+
+{% if error %}
+<div class="alert alert-danger">{{ error }}</div>
+{% endif %}
+
+<form method="post" action="/meals/dishes" style="max-width: 36rem;">
+  <div class="mb-3">
+    <label for="title" class="form-label fw-semibold">Title <span class="text-danger">*</span></label>
+    <input type="text" id="title" name="title" class="form-control" required value="{{ form.title or '' }}">
+  </div>
+
+  <div class="mb-3">
+    <label for="ingredients" class="form-label fw-semibold">Ingredients</label>
+    <textarea id="ingredients" name="ingredients" class="form-control" rows="5"
+      placeholder="One per line">{{ form.ingredients or '' }}</textarea>
+    <div class="form-text">Enter each ingredient on its own line.</div>
+  </div>
+
+  <div class="mb-3">
+    <label for="recipe_url" class="form-label fw-semibold">Recipe URL</label>
+    <input type="url" id="recipe_url" name="recipe_url" class="form-control" value="{{ form.recipe_url or '' }}" placeholder="https://…">
+  </div>
+
+  <div class="mb-4">
+    <label for="monthly_limit" class="form-label fw-semibold">Monthly limit</label>
+    <input type="number" id="monthly_limit" name="monthly_limit" class="form-control" style="max-width: 8rem;"
+      min="0" value="{{ form.monthly_limit or 0 }}">
+    <div class="form-text">0 = no limit.</div>
+  </div>
+
+  <button type="submit" class="btn btn-primary">Save dish</button>
+  <a href="/meals/dishes" class="btn btn-link text-muted">Cancel</a>
+</form>
+{% endblock %}

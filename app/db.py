@@ -27,9 +27,9 @@ def _ensure_sqlite_parent(database_url: str) -> None:
 database_url = get_settings().database_url
 _ensure_sqlite_parent(database_url)
 engine = create_engine(database_url, **_engine_kwargs(database_url))
-def configure_sqlite(connection) -> None:
-    connection.exec_driver_sql("PRAGMA foreign_keys=ON")
-    connection.exec_driver_sql("PRAGMA journal_mode=WAL")
+def configure_sqlite(connection, _connection_record) -> None:
+    connection.execute("PRAGMA foreign_keys=ON")
+    connection.execute("PRAGMA journal_mode=WAL")
 if engine.dialect.name == "sqlite":
     from sqlalchemy import event
 

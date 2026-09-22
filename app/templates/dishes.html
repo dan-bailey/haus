@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Dishes | Haus{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1 class="h2 mb-0">Dishes</h1>
+  <a class="btn btn-sm btn-outline-secondary" href="/meals/dishes/new">Add dish</a>
+</div>
+
+<form method="get" action="/meals/dishes" class="mb-4">
+  <div class="input-group" style="max-width: 26rem;">
+    <input type="search" name="q" class="form-control" placeholder="Search dishes…" value="{{ q or '' }}">
+    <button class="btn btn-outline-secondary" type="submit">Search</button>
+    {% if q %}<a class="btn btn-outline-secondary" href="/meals/dishes">Clear</a>{% endif %}
+  </div>
+</form>
+
+{% if dishes %}
+<ul class="list-group list-group-flush">
+  {% for dish in dishes %}
+  <li class="list-group-item bg-transparent d-flex justify-content-between align-items-center px-0">
+    <div>
+      <a class="fw-semibold text-decoration-none" href="/meals/dishes/{{ dish.id }}">{{ dish.title }}</a>
+      {% if dish.monthly_limit %}<span class="text-muted small ms-2">limit {{ dish.monthly_limit }}/mo</span>{% endif %}
+    </div>
+    {% if dish.recipe_url %}<a class="btn btn-sm btn-link text-muted p-0" href="{{ dish.recipe_url }}" target="_blank" rel="noopener">Recipe ↗</a>{% endif %}
+  </li>
+  {% endfor %}
+</ul>
+{% else %}
+<p class="text-muted">No dishes found{% if q %} for "{{ q }}"{% endif %}.</p>
+{% endif %}
+{% endblock %}

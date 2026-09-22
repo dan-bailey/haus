@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}{{ dish.title }} | Haus{% endblock %}
+{% block content %}
+<div class="mb-4">
+  <a class="text-muted small text-decoration-none" href="/meals/dishes">← Dishes</a>
+  <h1 class="h2 mt-2 mb-1">{{ dish.title }}</h1>
+  {% if dish.monthly_limit %}<p class="text-muted small mb-0">Limit: {{ dish.monthly_limit }} per month</p>{% endif %}
+  {% if dish.recipe_url %}<a class="small" href="{{ dish.recipe_url }}" target="_blank" rel="noopener">View recipe ↗</a>{% endif %}
+</div>
+
+<div class="row g-4">
+  <div class="col-12 col-md-5">
+    <h2 class="h5">Ingredients</h2>
+    {% if ingredients %}
+    <ul class="list-unstyled">
+      {% for ingredient in ingredients %}
+      <li class="py-1 border-bottom">{{ ingredient }}</li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="text-muted">No ingredients listed.</p>
+    {% endif %}
+  </div>
+
+  <div class="col-12 col-md-7">
+    <h2 class="h5">Cooking history</h2>
+    {% if cooking_events %}
+    <ul class="list-unstyled">
+      {% for event in cooking_events %}
+      <li class="py-1 border-bottom small">
+        <span class="fw-semibold">{{ event.cooked_on.strftime('%b %-d, %Y') }}</span>
+        <span class="text-muted ms-2">requested by {{ event.requested_by }}</span>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="text-muted">Not cooked yet.</p>
+    {% endif %}
+
+    {% if ratings %}
+    <h2 class="h5 mt-4">Ratings</h2>
+    <ul class="list-unstyled">
+      {% for r in ratings %}
+      <li class="py-1 border-bottom small">
+        <span class="fw-semibold">{{ r.user }}</span>
+        <span class="ms-2">{{ '★' * r.rating }}{{ '☆' * (5 - r.rating) }}</span>
+      </li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

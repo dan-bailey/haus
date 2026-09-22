@@ -4,34 +4,62 @@
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
   <div>
     <p class="text-uppercase small fw-semibold mb-1">Meal planning</p>
-    <h1 class="h2 mb-0">{{ week_start.strftime('%b %-d') }} - {{ days[-1].meal_date.strftime('%b %-d, %Y') if days[-1].meal_date else '' }}</h1>
+    <h1 class="h2 mb-0">{{ week_start.strftime('%b %-d') }} – {{ days[-1].meal_date.strftime('%b %-d, %Y') if days[-1].meal_date else '' }}</h1>
   </div>
-  <div class="btn-group" role="group" aria-label="Calendar week navigation">
-    <a class="btn btn-outline-secondary" href="/meals/calendar?week_start={{ previous_week }}">Previous</a>
-    <a class="btn btn-outline-secondary" href="/meals/calendar?week_start={{ next_week }}">Next</a>
+  <div class="d-flex gap-2 flex-wrap align-items-center">
+    <div class="btn-group" role="group" aria-label="Week navigation">
+      <a class="btn btn-outline-secondary" href="/meals/calendar?week_start={{ previous_week }}">Previous</a>
+      <a class="btn btn-outline-secondary" href="/meals/calendar?week_start={{ next_week }}">Next</a>
+    </div>
   </div>
 </div>
+
+{% set is_reviewer = current_user.role in ('administrator', 'parent') %}
+
 <div class="row g-3">
   {% for day in days %}
+  {% set meal_date = week_start.fromordinal(week_start.toordinal() + loop.index0) if not day.meal_date else day.meal_date %}
   <div class="col-12 col-md-6 col-xl-4">
-    <article class="day-card rounded-2 p-3 {% if day.feral %}feral{% endif %}">
-      <div class="d-flex justify-content-between align-items-baseline mb-3">
-        <h2 class="h5 mb-0">{{ day.meal_date.strftime('%A') if day.meal_date else 'Open day' }}</h2>
-        {% if day.meal_date %}<time class="text-muted small" datetime="{{ day.meal_date }}">{{ day.meal_date.strftime('%b %-d') }}</time>{% endif %}
+    <article class="day-card rounded-2 p-3 d-flex flex-column {% if day.feral %}feral{% endif %}">
+      <div class="d-flex justify-content-between align-items-baseline mb-2">
+        <h2 class="h5 mb-0">{{ meal_date.strftime('%A') }}</h2>
+        <time class="text-muted small" datetime="{{ meal_date }}">{{ meal_date.strftime('%b %-d') }}</time>
       </div>
-      {% if day.feral %}
-        <p class="fw-semibold mb-2">Feral Day</p>
-        <p class="text-muted small mb-0">No meal scheduled.</p>
-      {% elif day.dishes %}
-        <ul class="list-unstyled mb-3">
-        {% for dish in day.dishes %}
-          <li class="mb-2">{% if dish.recipe_url %}<a href="{{ dish.recipe_url }}">{{ dish.title }}</a>{% else %}{{ dish.title }}{% endif %}</li>
-        {% endfor %}
-        </ul>
-        <span class="status text-muted">{{ day.status }}</span>
-      {% else %}
-        <p class="text-muted mb-0">No meal planned.</p>
-      {% endif %}
+
+      <div class="flex-grow-1">
+        {% if day.feral %}
+          <p class="fw-semibold mb-1">Feral Day</p>
+          <p class="text-muted small mb-0">No meal scheduled.</p>
+        {% elif day.dishes %}
+          <ul class="list-unstyled mb-2">
+          {% for dish in day.dishes %}
+            <li class="mb-1">
+              {% if dish.recipe_url %}<a href="{{ dish.recipe_url }}" target="_blank" rel="noopener">{{ dish.title }}</a>
+              {% else %}{{ dish.title }}{% endif %}
+            </li>
+          {% endfor %}
+          </ul>
+          <span class="status text-muted">{{ day.status }}</span>
+        {% else %}
+          <p class="text-muted small mb-0">No meal planned.</p>
+        {% endif %}
+      </div>
+
+      <div class="mt-3 d-flex gap-2 flex-wrap">
+        {% if not day.meal_date %}
+          <a class="btn btn-sm btn-outline-secondary" href="/meals/days/plan?meal_date={{ meal_date }}">Plan this day</a>
+        {% else %}
+          <a class="btn btn-sm btn-outline-secondary" href="/meals/days/{{ day.meal_day_id }}/edit">Edit</a>
+          {% if day.status == 'proposed' and is_reviewer %}
+            <form method="post" action="/meals/days/{{ day.meal_day_id }}/approve" class="d-inline">
+              <button class="btn btn-sm btn-success">Approve</button>
+            </form>
+            <form method="post" action="/meals/days/{{ day.meal_day_id }}/disapprove" class="d-inline">
+              <button class="btn btn-sm btn-outline-danger">Disapprove</button>
+            </form>
+          {% endif %}
+        {% endif %}
+      </div>
     </article>
   </div>
   {% endfor %}

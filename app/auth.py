@@ -20,15 +20,16 @@ def google_client():
     settings = get_settings()
     if not settings.google_client_id or not settings.google_client_secret:
         return None
-    oauth.register(
-        name="google",
-        client_id=settings.google_client_id,
-        client_secret=settings.google_client_secret,
-        server_metadata_url=(
-            "https://accounts.google.com/.well-known/openid-configuration"
-        ),
-        client_kwargs={"scope": "openid email profile"},
-    )
+    if "google" not in oauth._clients:
+        oauth.register(
+            name="google",
+            client_id=settings.google_client_id,
+            client_secret=settings.google_client_secret,
+            server_metadata_url=(
+                "https://accounts.google.com/.well-known/openid-configuration"
+            ),
+            client_kwargs={"scope": "openid email profile"},
+        )
     return oauth.google
 
 

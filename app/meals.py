@@ -28,6 +28,36 @@ def monday_for(day: date) -> date:
     return day.fromordinal(day.toordinal() - day.weekday())
 
 
+def _check_monthly_limit(
+    session: Session,
+    *,
+    dish: Dish,
+    meal_date: date,
+    exclude_meal_day_id: str | None = None,
+) -> None:
+    if not dish.monthly_limit:
+        return
+    month_start = meal_date.replace(day=1)
+    month_end = meal_date.replace(day=monthrange(meal_date.year, meal_date.month)[1])
+    query = (
+        select(func.count(MealDayDish.dish_id))
+        .join(MealDay, MealDay.id == MealDayDish.meal_day_id)
+        .where(
+            MealDayDish.dish_id == dish.id,
+            MealDay.meal_date >= month_start,
+            MealDay.meal_date <= month_end,
+        )
+    )
+    if exclude_meal_day_id:
+        query = query.where(MealDay.id != exclude_meal_day_id)
+    already_planned = session.scalar(query) or 0
+    if already_planned >= dish.monthly_limit:
+        raise MealPlanningError(
+            f'"{dish.title}" has already been planned {already_planned} time(s) '
+            f"this month (limit: {dish.monthly_limit})"
+        )
+
+
 def normalize_ingredient_name(name: str) -> str:
     normalized = " ".join(name.split())
     if not normalized:
@@ -93,8 +123,10 @@ def create_meal_day(
     session.add(meal_day)
     session.flush()
     for dish_id in dict.fromkeys(dish_ids or []):
-        if session.get(Dish, dish_id) is None:
+        dish = session.get(Dish, dish_id)
+        if dish is None:
             raise MealPlanningError("dish does not exist")
+        _check_monthly_limit(session, dish=dish, meal_date=meal_date, exclude_meal_day_id=meal_day.id)
         session.add(MealDayDish(meal_day_id=meal_day.id, dish_id=dish_id))
     session.flush()
     return meal_day
